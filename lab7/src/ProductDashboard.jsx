@@ -10,14 +10,7 @@ function ProductDashboard() {
 
   console.log("Dashboard render");
 
-  // TODO 1:
-  // The filtering below runs **every time the component renders**.
-  // This is an expensive computation when data grows larger.
-  // Wrap this logic with `useMemo` so it only recomputes when:
-  // - items
-  // - filterText
-  // - category
-  // change.
+  // Recompute the filtered list only when the products or filters change.
   const filteredProducts = useMemo(() => {
     console.log("Filtering products...");
     return items
@@ -29,11 +22,7 @@ function ProductDashboard() {
       );
   }, [items, filterText, category]);
 
-  // TODO 2:
-  // The total price calculation is also heavy and runs on **every render**.
-  // Use `useMemo` so this expensive reduce operation only runs when
-  // filteredProducts changes.
-  
+  // Recompute the total only when the filtered list changes.
   const totalPrice = useMemo(() => {
     console.log("Computing total price...");
     return filteredProducts.reduce((sum, p) => {
@@ -46,21 +35,7 @@ function ProductDashboard() {
     }, 0);
   }, [filteredProducts]);
 
-  // TODO 3:
-  // Inline event handler creates a new function **every time the component renders**.
-  // When we later wrap ProductRow in React.memo, this will cause
-  // ALL rows to re-render because the onToggleFavorite prop is always a new function.
-  //
-  // Fix:
-  // 1. Create a separate function above the return block.
-  // 2. Wrap it in `useCallback` so the function reference stays stable.
-  //
-  // Example:
-  // const handleToggleFavorite = useCallback((id) => { ... }, []);
-  //
-  // Then in JSX:
-  // <ProductTable onToggleFavorite={handleToggleFavorite} />
-
+  // Keep this handler stable so memoized rows can skip unrelated renders.
   const handleToggleFavorite = useCallback((id) => {
     setItems((prev) =>
       prev.map((p) =>
@@ -68,7 +43,7 @@ function ProductDashboard() {
       )
     );
   }, []);
-  
+
   return (
     <div style={{ padding: "20px" }}>
       <h1>Product Dashboard</h1>
